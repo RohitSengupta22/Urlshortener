@@ -25,43 +25,49 @@ router.get('/url',fetchUser,async(req,res) =>{
     }
 })
 
-
-router.post('/url',fetchUser, async(req,res) =>{
+router.post('/short',fetchUser,async(req,res) =>{
     try{
 
         const {mainlink} = req.body;
-        const userId = req.id;
         const id = shortid.generate(4);
-        const url = new Url({
+        const userId = req.id;
+
+        const savedUrl = new Url({
             mainlink,
-            shortlink: id,
-            User: userId
+            shortid: id,
+            User: userId,
+            Date: Date.now()
+
         })
 
-        const savedurl = await url.save()
-        res.status(200).json(`${process.env.URL}/${savedurl.shortlink}`)
+        await savedUrl.save();
+        res.status(200).json(`${process.env.URL}/urlshortner/${savedUrl.shortid}`)
+
 
 
     }catch(error){
-        console.log(error)
+
+        res.status(400).json({error: error.message})
+
     }
 })
 
-router.get('/:shortlink', async(req,res) =>{
-    const {shortlink} = req.params;
-    const url = await Url.findOne({shortlink})
-
-    try{
-
-        if(url){
-            res.redirect(url.mainlink)
-        }
-
-       
-
-    }catch(error){
-        console.log(error)
+router.get('/:shortid', async (req, res) => {
+    try {
+      const { shortid } = req.params;
+      const url = await Url.findOne({ shortid: shortid }); // Use findOne instead of find and correct the field name
+  
+      if (url) {
+        res.redirect(url.mainlink);
+      } else {
+        res.status(404).json({ msg: 'URL not found' });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ msg: 'Server Error' });
     }
-})
+  });
+  
+
 
 module.exports = router;

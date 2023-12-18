@@ -5,7 +5,7 @@ const UrlSchema = new Schema({
   mainlink : {
     type: String
   },
-  shortlink : {
+  shortid : {
     type: String
   },
   User : {
